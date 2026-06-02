@@ -317,6 +317,7 @@ $('#btn-theme').addEventListener('click', () => {
   if (map && map._tileLayers) {
     map.removeLayer(map._tileLayers[currentTileLayer]);
     if (darkMode) {
+      // Dark mode: no local dark tiles, use satellite online
       map.addLayer(map._tileLayers.satellite);
       currentTileLayer = 'satellite';
     } else {
@@ -731,25 +732,30 @@ function initMap() {
   const el = $('#map');
   if (!el || !window.L) return;
 
-  // ===== GOOGLE MAPS ACTUAL TILES (exact Google Maps look) =====
+  // ===== LOCAL GOOGLE MAPS TILES (offline) + ONLINE FALLBACK =====
   const GM_KEY = 'AIzaSyAeMW2Ko4SqaY42gKNMAMYSFgnEuuFSeDQ';
+  const gmOnlineUrl = (lyrs) => 'https://mt{s}.google.com/vt/lyrs=' + lyrs + '&x={x}&y={y}&z={z}&key=' + GM_KEY;
+
   const tileLayers = {
-    streets: L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&key=' + GM_KEY, {
+    // LOCAL tiles (zoom 14-17) + online fallback for zoom 18+
+    streets: L.tileLayer('tiles/{z}/{x}/{y}.png', {
+      attribution: '&copy; Google Maps',
+      maxZoom: 22,
+      minZoom: 14,
+      errorTileUrl: gmOnlineUrl('m'),
+      subdomains: '0123',
+    }),
+    satellite: L.tileLayer(gmOnlineUrl('y'), {
       subdomains: '0123',
       attribution: '&copy; Google Maps',
       maxZoom: 22,
     }),
-    satellite: L.tileLayer('https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&key=' + GM_KEY, {
+    terrain: L.tileLayer(gmOnlineUrl('p'), {
       subdomains: '0123',
       attribution: '&copy; Google Maps',
       maxZoom: 22,
     }),
-    terrain: L.tileLayer('https://mt{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}&key=' + GM_KEY, {
-      subdomains: '0123',
-      attribution: '&copy; Google Maps',
-      maxZoom: 22,
-    }),
-    hybrid: L.tileLayer('https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}&key=' + GM_KEY, {
+    hybrid: L.tileLayer(gmOnlineUrl('s'), {
       subdomains: '0123',
       attribution: '&copy; Google Maps',
       maxZoom: 22,
