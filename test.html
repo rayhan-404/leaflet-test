@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head><title>Supabase Debug Test</title></head>
+<body style="background:#111;color:#fff;font-family:monospace;padding:20px">
+<h2>Supabase REST Client Debug</h2>
+<pre id="log"></pre>
+<script>
+const SUPABASE_URL = 'https://jubxlyqbtssflpzzyzug.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_buD22GJyI9D-EI--xZCFsw_ARAIrSfV';
+const SUPABASE_REST = SUPABASE_URL + '/rest/v1';
+const API_HEADERS = {
+  'apikey': SUPABASE_ANON_KEY,
+  'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=representation',
+};
+
+function log(msg) {
+  document.getElementById('log').textContent += msg + '\n';
+  console.log(msg);
+}
+
+async function test() {
+  // TEST 1: Read
+  log('--- TEST 1: READ ---');
+  try {
+    const url = SUPABASE_REST + '/reports?select=*&deleted=eq.false&order=created_at.desc';
+    log('URL: ' + url);
+    const res = await fetch(url, { headers: API_HEADERS });
+    const text = await res.text();
+    log('Status: ' + res.status);
+    log('Body: ' + text);
+    const data = JSON.parse(text);
+    log('Parsed count: ' + data.length);
+    log('READ: OK');
+  } catch(e) {
+    log('READ ERROR: ' + e.message);
+  }
+
+  // TEST 2: Insert
+  log('\n--- TEST 2: INSERT ---');
+  try {
+    const url2 = SUPABASE_REST + '/reports';
+    const body = {
+      place: "ডিবাগ টেস্ট",
+      cause: "যানজট",
+      sev: "med",
+      lat: 22.85,
+      lng: 89.55,
+      reporter: "DebugBot",
+      upvotes: 0,
+      flagged: false,
+      deleted: false,
+      created_at: Date.now()
+    };
+    log('Body: ' + JSON.stringify(body));
+    const res2 = await fetch(url2, {
+      method: 'POST',
+      headers: { ...API_HEADERS, 'Prefer': 'return=representation' },
+      body: JSON.stringify(body)
+    });
+    const text2 = await res2.text();
+    log('Status: ' + res2.status);
+    log('Body: ' + text2);
+    log('INSERT: ' + (res2.ok ? 'OK' : 'FAILED'));
+  } catch(e) {
+    log('INSERT ERROR: ' + e.message);
+  }
+
+  // TEST 3: Read again
+  log('\n--- TEST 3: READ AFTER INSERT ---');
+  try {
+    const url3 = SUPABASE_REST + '/reports?select=*&order=created_at.desc';
+    const res3 = await fetch(url3, { headers: API_HEADERS });
+    const data3 = await res3.json();
+    log('Total rows now: ' + data3.length);
+    log('Latest: ' + JSON.stringify(data3[0]));
+    log('READ AFTER INSERT: OK');
+  } catch(e) {
+    log('READ ERROR: ' + e.message);
+  }
+
+  log('\n=== ALL TESTS DONE ===');
+}
+
+test();
+</script>
+</body>
+</html>
