@@ -317,8 +317,8 @@ $('#btn-theme').addEventListener('click', () => {
   if (map && map._tileLayers) {
     map.removeLayer(map._tileLayers[currentTileLayer]);
     if (darkMode) {
-      map.addLayer(map._tileLayers.dark);
-      currentTileLayer = 'dark';
+      map.addLayer(map._tileLayers.satellite);
+      currentTileLayer = 'satellite';
     } else {
       map.addLayer(map._tileLayers.streets);
       currentTileLayer = 'streets';
@@ -731,23 +731,28 @@ function initMap() {
   const el = $('#map');
   if (!el || !window.L) return;
 
-  // Tile layers (Google Maps-like CartoDB Voyager is closest)
+  // ===== GOOGLE MAPS ACTUAL TILES (exact Google Maps look) =====
+  const GM_KEY = 'AIzaSyAeMW2Ko4SqaY42gKNMAMYSFgnEuuFSeDQ';
   const tileLayers = {
-    streets: L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap &copy; CARTO',
-      maxZoom: 20,
+    streets: L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&key=' + GM_KEY, {
+      subdomains: '0123',
+      attribution: '&copy; Google Maps',
+      maxZoom: 22,
     }),
-    satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      attribution: '&copy; Esri',
-      maxZoom: 19,
+    satellite: L.tileLayer('https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&key=' + GM_KEY, {
+      subdomains: '0123',
+      attribution: '&copy; Google Maps',
+      maxZoom: 22,
     }),
-    dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap &copy; CARTO',
-      maxZoom: 20,
+    terrain: L.tileLayer('https://mt{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}&key=' + GM_KEY, {
+      subdomains: '0123',
+      attribution: '&copy; Google Maps',
+      maxZoom: 22,
     }),
-    light: L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap &copy; CARTO',
-      maxZoom: 20,
+    hybrid: L.tileLayer('https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}&key=' + GM_KEY, {
+      subdomains: '0123',
+      attribution: '&copy; Google Maps',
+      maxZoom: 22,
     }),
   };
 
@@ -774,7 +779,7 @@ function initMap() {
   // Map type toggle (same as before, using the existing .gm-custom-map-type class)
   const mapTypeDiv = document.createElement('div');
   mapTypeDiv.className = 'gm-custom-map-type';
-  mapTypeDiv.innerHTML = `<button class="gm-type-btn active" data-style="streets">ম্যাপ</button><button class="gm-type-btn" data-style="satellite">স্যাটেলাইট</button>`;
+  mapTypeDiv.innerHTML = `<button class="gm-type-btn active" data-style="streets">ম্যাপ</button><button class="gm-type-btn" data-style="satellite">স্যাটেলাইট</button><button class="gm-type-btn" data-style="terrain">টেরেইন</button><button class="gm-type-btn" data-style="hybrid">হাইব্রিড</button>`;
   mapTypeDiv.style.marginTop = '44px';
   mapTypeDiv.querySelectorAll('.gm-type-btn').forEach(btn => {
     btn.addEventListener('click', () => {
