@@ -732,30 +732,28 @@ function initMap() {
   const el = $('#map');
   if (!el || !window.L) return;
 
-  // ===== LOCAL GOOGLE MAPS TILES (offline) + ONLINE FALLBACK =====
+  // ===== GOOGLE MAPS ONLINE TILES (all zoom levels, crisp & sharp) =====
   const GM_KEY = 'AIzaSyAeMW2Ko4SqaY42gKNMAMYSFgnEuuFSeDQ';
-  const gmOnlineUrl = (lyrs) => 'https://mt{s}.google.com/vt/lyrs=' + lyrs + '&x={x}&y={y}&z={z}&key=' + GM_KEY;
+  const gmUrl = (lyrs) => 'https://mt{s}.google.com/vt/lyrs=' + lyrs + '&x={x}&y={y}&z={z}&key=' + GM_KEY;
 
   const tileLayers = {
-    // LOCAL tiles (zoom 14-17) + online fallback for zoom 18+
-    streets: L.tileLayer('tiles/{z}/{x}/{y}.png', {
+    streets: L.tileLayer(gmUrl('m'), {
+      subdomains: '0123',
       attribution: '&copy; Google Maps',
       maxZoom: 22,
-      minZoom: 14,
-      errorTileUrl: gmOnlineUrl('m'),
-      subdomains: '0123',
+      minZoom: 1,
     }),
-    satellite: L.tileLayer(gmOnlineUrl('y'), {
+    satellite: L.tileLayer(gmUrl('y'), {
       subdomains: '0123',
       attribution: '&copy; Google Maps',
       maxZoom: 22,
     }),
-    terrain: L.tileLayer(gmOnlineUrl('p'), {
+    terrain: L.tileLayer(gmUrl('p'), {
       subdomains: '0123',
       attribution: '&copy; Google Maps',
       maxZoom: 22,
     }),
-    hybrid: L.tileLayer(gmOnlineUrl('s'), {
+    hybrid: L.tileLayer(gmUrl('s'), {
       subdomains: '0123',
       attribution: '&copy; Google Maps',
       maxZoom: 22,
@@ -765,9 +763,9 @@ function initMap() {
   currentTileLayer = 'streets';
   map = L.map(el, {
     center: [22.8456, 89.5403],
-    zoom: 14,
-    minZoom: 10,
-    maxZoom: 21,
+    zoom: 15,
+    minZoom: 3,
+    maxZoom: 22,
     zoomControl: false,
     attributionControl: false,
     layers: [tileLayers.streets],
